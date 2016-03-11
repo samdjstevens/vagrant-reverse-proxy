@@ -3,6 +3,7 @@ module VagrantPlugins
     class Plugin
       class Config < Vagrant.plugin(2, :config)
         attr_accessor :enabled
+        alias_method :enabled?, :enabled
 
         def initialize
           @enabled = UNSET_VALUE

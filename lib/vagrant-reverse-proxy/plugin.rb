@@ -18,19 +18,19 @@ module VagrantPlugins
       end
 
       action_hook(:reverse_proxy, :machine_action_up) do |hook|
-        hook.append(lambda{|*x| puts "Machine is up"})
+        hook.append(Action.add_machine)
       end
 
       action_hook(:reverse_proxy, :machine_action_suspend) do |hook|
-        hook.append(lambda{|*x| puts "Machine is suspended"})
+        hook.append(Action.remove_machine)
       end
 
       action_hook(:reverse_proxy, :machine_action_resume) do |hook|
-        hook.append(lambda{|*x| puts "Machine is resumed"})
+        hook.append(Action.add_machine)
       end
 
       action_hook(:reverse_proxy, :machine_action_halt) do |hook|
-        hook.append(lambda{|*x| puts "Machine is halted"})
+        hook.append(Action.remove_machine)
       end
     end
   end
