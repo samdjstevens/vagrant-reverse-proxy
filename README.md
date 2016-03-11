@@ -7,6 +7,11 @@ This means you can access the HTTP interface of your virtual machines
 by accessing HTTP on your machine's IP address or DNS hostname, with
 a suffix that indicates the VM.
 
+In other words, `http://localhost/my-vm` refers to `http://my-vm/` on
+the local machine.  This also works if you access it from an external
+machine, even though `my-vm` is a local machine name unknown on the
+network.
+
 This plugin currently only supports NGINX, but patches are accepted to
 integrate it with other web servers.
 
