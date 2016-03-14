@@ -36,18 +36,17 @@ module VagrantPlugins
 
         # Machine-finding code stolen from vagrant-hostmanager :)
         def get_machines()
-          machines = @global_env.active_machines
-                     .select { |name, provider| provider == @provider }
-                     .collect { |name, provider| name }
-
           # Collect only machines that exist for the current provider
-          machines.select do |name|
-            begin
-              @global_env.machine(name, @provider)
-            rescue Vagrant::Errors::MachineNotFound
-              nil #ignore
+          @global_env.active_machines.collect do |name, provider|
+            if provider == @provider
+              begin
+                m = @global_env.machine(name, @provider)
+                m.state.id == :running ? m : nil
+              rescue Vagrant::Errors::MachineNotFound
+                nil #ignore
+              end
             end
-          end
+          end.compact
         end
 
         # Also from vagrant-hostmanager
