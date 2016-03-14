@@ -2,15 +2,17 @@ module VagrantPlugins
   module ReverseProxy
     class Plugin
       class Config < Vagrant.plugin(2, :config)
-        attr_accessor :enabled
+        attr_accessor :enabled, :vhosts
         alias_method :enabled?, :enabled
 
         def initialize
           @enabled = UNSET_VALUE
+          @vhosts = UNSET_VALUE
         end
 
         def finalize!
           @enabled = false if @enabled == UNSET_VALUE
+          @vhosts = nil if @vhosts == UNSET_VALUE
         end
 
         def validate(machine)
@@ -18,6 +20,10 @@ module VagrantPlugins
 
           unless [true, false, UNSET_VALUE].include?(@enabled)
             errors << 'enabled must be a boolean'
+          end
+
+          unless @vhosts.instance_of?(Array) || @vhosts == nil || @vhosts == UNSET_VALUE
+            errors << 'vhosts must be an array of hostnames (or nil to use default name)'
           end
 
           { 'Reverse proxy configuration' => errors.compact }

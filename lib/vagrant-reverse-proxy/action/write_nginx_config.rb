@@ -18,6 +18,8 @@ module VagrantPlugins
           tmp_file = @global_env.tmp_path.join('nginx.vagrant-proxies')
           nginx_site = '/etc/nginx/vagrant-proxy-config'
 
+          env[:ui].info('Updating nginx configuration. Administrator privileges will be required...')
+
           File.open(tmp_file, 'w') do |f|
             get_machines().each do |m|
               f.write(server_block(m))
@@ -29,9 +31,20 @@ module VagrantPlugins
         end
 
         def server_block(machine)
-          host = machine.config.vm.hostname || machine.name
+          if @config.reverse_proxy.vhosts
+            vhosts = @config.reverse_proxy.vhosts
+          else
+            vhosts = [machine.config.vm.hostname || machine.name]
+          end
           ip = get_ip_address(machine)
-          return "location /#{host}/ { proxy_pass http://#{ip}/; }"
+          vhosts.collect do |vhost| <<EOF
+location /#{vhost}/ {
+    proxy_set_header Host #{vhost};
+    proxy_pass http://#{ip}/;
+    proxy_redirect http://#{vhost}/ /#{vhost}/;
+}
+EOF
+          end.join("\n")
         end
 
         # Machine-finding code stolen from vagrant-hostmanager :)

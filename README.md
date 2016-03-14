@@ -49,3 +49,13 @@ value of `foo`.  This is only done for virtual machines that have
 Whenever you bring up or halt a machine, the plugin updates the proxy
 config file and invokes `sudo systemctl reload nginx` to make the
 change immediately visible.
+
+### Custom host names
+
+Sometimes you want to support several virtual hosts for one VM.  To
+set that up, you can override the `vhosts` option:
+
+    config.reverse_proxy.vhosts = ['foo.test', 'bar.test']
+
+This will proxy `http://localhost/foo.test` and
+`http://localhost/bar.test` to this VM, with a matching `Host` header.
