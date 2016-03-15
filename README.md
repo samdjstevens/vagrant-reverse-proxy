@@ -23,7 +23,7 @@ Install the plugin as usual:
 
 ## Usage
 
-First, install nginx and create a configuration as usual.  Then, in
+First, install NGINX and create a configuration as usual.  Then, in
 the `server` configuration block for the host you want to use for
 proxying, simply put `include "vagrant-proxy-config";` in the file.
 
@@ -59,3 +59,29 @@ set that up, you can override the `vhosts` option:
 
 This will proxy `http://localhost/foo.test` and
 `http://localhost/bar.test` to this VM, with a matching `Host` header.
+
+## Adding proxy support to your application
+
+This plugin will instruct NGINX to pass the following headers to your
+Vagrant box:
+
+- `X-Forwarded-For`: This contains the IP address of the client.
+- `X-Forwarded-Host`: This contains the IP address of your hypervisor.
+- `X-Forwarded-Port`: This contains the port number of NGINX on your hypervisor.
+- `X-Base-Url`: This contains the base URL that redirects to this VM.
+
+Redirects are transparently rewritten by NGINX, but if your
+application generates links with absolute URLs, you'll need to ensure
+that those links are prefixed with the value of `X-Base-Url`, but only
+if the request originated from the trusted NGINX proxy on your
+hypervisor.
+
+Be sure to avoid using these headers when the request originated
+elsewhere, because trusting these headers as sent by arbitrary clients
+is a potential security issue!  If you're using Laravel, you could
+consider using the
+[trusted proxies middleware](https://github.com/fideloper/TrustedProxy).
+If you're using Symfony, just use `setTrustedProxies()` on your
+`Request` object, and Symfony takes care of the rest.  Note that
+`X-Base-Url` is not supported by either framework, so you'll need to
+add a bit of custom code there if you need to override the base URL.
