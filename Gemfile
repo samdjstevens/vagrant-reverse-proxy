@@ -8,7 +8,7 @@ group :plugins do
   # This gem's dependencies are in vagrant-reverse-proxy.gemspec
   gemspec
 
-  # Remove when done testing!
-  gem 'vagrant-libvirt'
-  gem 'vagrant-hostmanager'
+  # Useful when testing
+  #gem 'vagrant-libvirt'
+  #gem 'vagrant-hostmanager'
 end
