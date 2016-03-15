@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["peter@codeyellow.nl"]
   spec.summary       = %q{A vagrant plugin that adds reverse proxies for your VMs}
   spec.description   = %q{This plugin manages reverse proxy configuration (currently nginx-only) so you can reach your Vagrant VM's web servers externally without having to set up bridge networking.}
-  spec.homepage      = ""
+  spec.homepage      = "https://github.com/CodeYellowBV/vagrant-reverse-proxy"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0")
