@@ -15,8 +15,13 @@ module VagrantPlugins
           return unless @config.reverse_proxy.enabled?
 
           # Determine temp file and target file
+          nginx_dir = '/etc/nginx'
+          unless File.directory?(nginx_dir)
+            env[:ui].error("Could not update nginx configuration: directory '#{nginx_dir}' does not exist.  Continuing without proxy...")
+            return
+          end
+          nginx_site = "#{nginx_dir}/vagrant-proxy-config"
           tmp_file = @global_env.tmp_path.join('nginx.vagrant-proxies')
-          nginx_site = '/etc/nginx/vagrant-proxy-config'
 
           env[:ui].info('Updating nginx configuration. Administrator privileges will be required...')
 
@@ -27,7 +32,7 @@ module VagrantPlugins
           end
 
           Kernel.system('sudo', 'cp', tmp_file.to_s, nginx_site)
-          Kernel.system('sudo', 'systemctl', 'reload', 'nginx')
+          Kernel.system('sudo', 'service', 'reload', 'nginx')
         end
 
         def server_block(machine)
