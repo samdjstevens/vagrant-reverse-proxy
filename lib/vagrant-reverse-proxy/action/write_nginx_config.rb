@@ -32,7 +32,7 @@ module VagrantPlugins
           end
 
           Kernel.system('sudo', 'cp', tmp_file.to_s, nginx_site)
-          Kernel.system('sudo', 'service', 'reload', 'nginx')
+          Kernel.system('sudo', 'service', 'nginx', 'reload')
         end
 
         def server_block(machine)
