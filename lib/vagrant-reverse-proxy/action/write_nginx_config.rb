@@ -48,7 +48,7 @@ location /#{vhost}/ {
     proxy_set_header X-Forwarded-For $remote_addr;
     proxy_set_header X-Forwarded-Host $host;
     proxy_set_header X-Forwarded-Port $server_port;
-    proxy_set_header X-Base-Url http://$host:$server_port/nl.dr.dev/;
+    proxy_set_header X-Base-Url http://$host:$server_port/#{vhost}/;
 
     proxy_pass http://#{ip}/;
     proxy_redirect http://#{vhost}/ /#{vhost}/;
