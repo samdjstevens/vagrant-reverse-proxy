@@ -5,8 +5,6 @@ module VagrantPlugins
     module Action
       include Vagrant::Action::Builtin
 
-      # We (currently) don't distinguish between upping and downing a
-      # machine; we always write a complete config with all machines.
       def self.add_machine
         Vagrant::Action::Builder.new.tap do |builder|
           builder.use(ConfigValidate)

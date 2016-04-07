@@ -59,19 +59,24 @@ module VagrantPlugins
           if @config.reverse_proxy.vhosts
             vhosts = @config.reverse_proxy.vhosts
           else
-            vhosts = [machine.config.vm.hostname || machine.name]
+            host = machine.config.vm.hostname || machine.name
+            vhosts = {host => host}
           end
           ip = get_ip_address(machine)
-          vhosts.collect do |vhost| <<EOF
-location /#{vhost}/ {
-    proxy_set_header Host #{vhost};
+          vhosts.collect do |path, vhost|
+            # Rewrites are matches literally by nginx, which means
+            # http://host:80/... will NOT match http://host/...!
+            port_suffix = vhost[:port] == 80 ? '' : ":#{vhost[:port]}"
+            <<EOF
+location /#{path}/ {
+    proxy_set_header Host #{vhost[:host]};
     proxy_set_header X-Forwarded-For $remote_addr;
     proxy_set_header X-Forwarded-Host $host;
     proxy_set_header X-Forwarded-Port $server_port;
-    proxy_set_header X-Base-Url http://$host:$server_port/#{vhost}/;
+    proxy_set_header X-Base-Url http://$host:$server_port/#{path}/;
 
-    proxy_pass http://#{ip}/;
-    proxy_redirect http://#{vhost}/ /#{vhost}/;
+    proxy_pass http://#{ip}#{port_suffix}/;
+    proxy_redirect http://#{vhost[:host]}#{port_suffix}/ /#{path}/;
 }
 EOF
           end.join("\n")

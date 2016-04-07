@@ -60,6 +60,19 @@ set that up, you can override the `vhosts` option:
 This will proxy `http://localhost/foo.test` and
 `http://localhost/bar.test` to this VM, with a matching `Host` header.
 
+If you want to customize the vhost path, you can use a hash instead of
+an array:
+
+    config.reverse_proxy.vhosts = {
+        "foo-test" => "foo.test",
+        "bar" => "bar.test"
+        "bar-altport" => {:host => "bar.test", :port => 8080}
+    }
+
+As you can see, this allows you to define which port to connect to
+instead of the default port (which is port 80).
+
+
 ## Adding proxy support to your application
 
 This plugin will instruct NGINX to pass the following headers to your
