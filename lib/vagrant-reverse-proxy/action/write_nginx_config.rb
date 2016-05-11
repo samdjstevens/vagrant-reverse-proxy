@@ -28,25 +28,30 @@ module VagrantPlugins
 
           machines = get_machines()
           # This code is so stupid
-          File.open(nginx_site, 'r') do |old|
-            File.open(tmp_file, 'w') do |new|
-              sm = machines.map {|m| start_marker(m) }
-              em = machines.map {|m| end_marker(m) }
+          File.open(tmp_file, 'w') do |new|
+            begin
+              File.open(nginx_site, 'r') do |old|
+                sm = machines.map {|m| start_marker(m) }
+                em = machines.map {|m| end_marker(m) }
 
-              while ln = old.gets() do
-                if sm.member?(ln.chomp)
-                  until !ln || em.member?(ln.chomp) do
-                    ln = old.gets()
+                while ln = old.gets() do
+                  if sm.member?(ln.chomp)
+                    until !ln || em.member?(ln.chomp) do
+                      ln = old.gets()
+                    end
+                  else
+                    new.puts(ln)
                   end
-                else
-                  new.puts(ln)
                 end
               end
+            rescue Errno::ENOENT
+              # Ignore errors about the source file not existing;
+              # we'll create it soon enough.
+            end
 
-              if @action == :add
-                machines.each do |m|
-                  new.write(start_marker(m)+"\n"+server_block(m)+end_marker(m)+"\n")
-                end
+            if @action == :add
+              machines.each do |m|
+                new.write(start_marker(m)+"\n"+server_block(m)+end_marker(m)+"\n")
               end
             end
           end
