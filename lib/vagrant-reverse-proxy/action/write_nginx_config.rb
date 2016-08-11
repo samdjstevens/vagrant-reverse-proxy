@@ -4,16 +4,16 @@ module VagrantPlugins
       class WriteNginxConfig
         def initialize(app, env, action)
           @app = app
-          @global_env = env[:machine].env
-          @provider = env[:machine].provider_name
-          @config = @global_env.vagrantfile.config
           @action = action
         end
 
         def call(env)
           @app.call(env)
 
-          return unless @config.reverse_proxy.enabled?
+          # Does this make much sense?  What if we disable it later
+          # for one specific machine?  Then, the config should still
+          # be removed.
+          return unless env[:machine].config.reverse_proxy.enabled?
 
           # Determine temp file and target file
           nginx_dir = '/etc/nginx'
@@ -22,24 +22,29 @@ module VagrantPlugins
             return
           end
           nginx_site = "#{nginx_dir}/vagrant-proxy-config"
-          tmp_file = @global_env.tmp_path.join('nginx.vagrant-proxies')
+          tmp_file = env[:machine].env.tmp_path.join('nginx.vagrant-proxies')
 
           env[:ui].info('Updating nginx configuration. Administrator privileges will be required...')
 
-          machines = get_machines()
-          # This code is so stupid
+          sm = start_marker(env[:machine])
+          em = end_marker(env[:machine])
+
+          # This code is so stupid: We write a tmp file with the
+          # current config, filtered to exclude this machine.  Later,
+          # we put this machine's config back in.  It might have
+          # changed, and might not have been present originally.
           File.open(tmp_file, 'w') do |new|
             begin
               File.open(nginx_site, 'r') do |old|
-                sm = machines.map {|m| start_marker(m) }
-                em = machines.map {|m| end_marker(m) }
-
+                # First, remove old entries for this machine.
                 while ln = old.gets() do
-                  if sm.member?(ln.chomp)
-                    until !ln || em.member?(ln.chomp) do
+                  if sm == ln.chomp
+                    # Skip lines until we find EOF or end marker
+                    until !ln || em == ln.chomp do
                       ln = old.gets()
                     end
                   else
+                    # Keep lines for other machines.
                     new.puts(ln)
                   end
                 end
@@ -49,20 +54,22 @@ module VagrantPlugins
               # we'll create it soon enough.
             end
 
-            if @action == :add
-              machines.each do |m|
-                new.write(start_marker(m)+"\n"+server_block(m)+end_marker(m)+"\n")
+            if @action == :add # Removal is already (always) done above
+              # Write the config for this machine
+              if env[:machine].config.reverse_proxy.enabled?
+                new.write(sm+"\n"+server_block(env[:machine])+em+"\n")
               end
             end
           end
 
+          # Finally, copy tmp config to actual config and reload nginx
           Kernel.system('sudo', 'cp', tmp_file.to_s, nginx_site)
           Kernel.system('sudo', 'service', 'nginx', 'reload')
         end
 
         def server_block(machine)
-          if @config.reverse_proxy.vhosts
-            vhosts = @config.reverse_proxy.vhosts
+          if machine.config.reverse_proxy.vhosts
+            vhosts = machine.config.reverse_proxy.vhosts
           else
             host = machine.config.vm.hostname || machine.name
             vhosts = {host => host}
@@ -93,20 +100,6 @@ EOF
 
         def end_marker(m)
           "# END #{m.id} #"
-        end
-
-        # Machine-finding code stolen from vagrant-hostmanager :)
-        def get_machines()
-          # Collect only machines that exist for the current provider
-          @global_env.active_machines.collect do |name, provider|
-            if provider == @provider
-              begin
-                @global_env.machine(name, @provider)
-              rescue Vagrant::Errors::MachineNotFound
-                nil #ignore
-              end
-            end
-          end.compact
         end
 
         # Also from vagrant-hostmanager
