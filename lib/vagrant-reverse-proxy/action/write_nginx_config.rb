@@ -16,12 +16,16 @@ module VagrantPlugins
           return unless env[:machine].config.reverse_proxy.enabled?
 
           # Determine temp file and target file
-          nginx_dir = '/etc/nginx'
-          unless File.directory?(nginx_dir)
-            env[:ui].error("Could not update nginx configuration: directory '#{nginx_dir}' does not exist.  Continuing without proxy...")
+          nginx_config_file = env[:machine].config.reverse_proxy.nginx_config_file || '/etc/nginx/vagrant-proxy-config'
+
+          # Get the directory of the config file
+          nginx_config_dir = File.dirname(nginx_config_file)
+
+          unless File.directory?(nginx_config_dir)
+            env[:ui].error("Could not update nginx configuration: directory '#{nginx_config_dir}' does not exist.  Continuing without proxy...")
             return
           end
-          nginx_site = "#{nginx_dir}/vagrant-proxy-config"
+
           tmp_file = env[:machine].env.tmp_path.join('nginx.vagrant-proxies')
 
           env[:ui].info('Updating nginx configuration. Administrator privileges will be required...')
@@ -35,7 +39,7 @@ module VagrantPlugins
           # changed, and might not have been present originally.
           File.open(tmp_file, 'w') do |new|
             begin
-              File.open(nginx_site, 'r') do |old|
+              File.open(nginx_config_file, 'r') do |old|
                 # First, remove old entries for this machine.
                 while ln = old.gets() do
                   if sm == ln.chomp
@@ -63,7 +67,7 @@ module VagrantPlugins
           end
 
           # Finally, copy tmp config to actual config and reload nginx
-          Kernel.system('sudo', 'cp', tmp_file.to_s, nginx_site)
+          Kernel.system('sudo', 'cp', tmp_file.to_s, nginx_config_file)
           Kernel.system('sudo', 'service', 'nginx', 'reload')
         end
 
