@@ -103,3 +103,12 @@ If you're using Symfony, just use `setTrustedProxies()` on your
 `Request` object, and Symfony takes care of the rest.  Note that
 `X-Base-Url` is not supported by either framework, so you'll need to
 add a bit of custom code there if you need to override the base URL.
+
+
+## Changelog
+
+- 0.3 Allow overriding the location of the NGINX configuration file
+  (thanks to Sam Stevens).  Support multiple VMs in a single Vagrant
+  config (suggested by Nicholas Alipaz).
+- 0.2 Support for proxying of multiple ports in `vhosts` config.
+- 0.1 First version
