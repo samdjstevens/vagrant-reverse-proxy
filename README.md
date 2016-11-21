@@ -72,6 +72,11 @@ an array:
 As you can see, this allows you to define which port to connect to
 instead of the default port (which is port 80).
 
+### Specifying the NGINX configuration file path
+
+If you want to change the location of the managed nginx configuration file, set the `config.reverse_proxy.nginx_config_file` value to a path on your host machine in the Vagrantfile configuration:
+
+    config.reverse_proxy.nginx_config_file = '/usr/local/etc/nginx/vagrant-proxy-config'
 
 ## Adding proxy support to your application
 
