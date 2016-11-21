@@ -78,6 +78,12 @@ If you want to change the location of the managed nginx configuration file, set 
 
     config.reverse_proxy.nginx_config_file = '/usr/local/etc/nginx/vagrant-proxy-config'
 
+### Specifying the NGINX reload command
+
+After the NGINX configuration file is generated, a reload command is executed so that the changes take affect. By default the command executed is `sudo service nginx reload`. If you need to change this, set the `config.reverse_proxy.nginx_reload_command` option to the command to be executed:
+
+    config.reverse_proxy.nginx_reload_command = 'sudo nginx -s reload'
+
 ## Adding proxy support to your application
 
 This plugin will instruct NGINX to pass the following headers to your
