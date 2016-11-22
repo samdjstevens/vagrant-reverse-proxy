@@ -2,13 +2,14 @@ module VagrantPlugins
   module ReverseProxy
     class Plugin
       class Config < Vagrant.plugin(2, :config)
-        attr_accessor :enabled, :vhosts, :nginx_config_file
+        attr_accessor :enabled, :vhosts, :nginx_config_file, :nginx_reload_command
         alias_method :enabled?, :enabled
 
         def initialize
           @enabled = UNSET_VALUE
           @vhosts = UNSET_VALUE
           @nginx_config_file = UNSET_VALUE
+          @nginx_reload_command = UNSET_VALUE
         end
 
         def finalize!
@@ -32,6 +33,9 @@ module VagrantPlugins
           end
           if @nginx_config_file == UNSET_VALUE
             @nginx_config_file = nil
+          end
+          if @nginx_reload_command == UNSET_VALUE
+            @nginx_reload_command = nil
           end
         end
 
@@ -67,6 +71,10 @@ module VagrantPlugins
 
           unless @nginx_config_file.instance_of?(String) || @nginx_config_file == nil || @nginx_config_file == UNSET_VALUE
             errors << 'nginx_config_file must be a string'
+          end
+
+          unless @nginx_reload_command.instance_of?(String) || @nginx_reload_command == nil || @nginx_reload_command == UNSET_VALUE
+            errors << 'nginx_reload_command must be a string'
           end
 
           { 'Reverse proxy configuration' => errors.compact }

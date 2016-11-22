@@ -66,9 +66,12 @@ module VagrantPlugins
             end
           end
 
-          # Finally, copy tmp config to actual config and reload nginx
+          # Finally, copy tmp config to actual config
           Kernel.system('sudo', 'cp', tmp_file.to_s, nginx_config_file)
-          Kernel.system('sudo', 'service', 'nginx', 'reload')
+
+          # And reload nginx
+          nginx_reload_command = env[:machine].config.reverse_proxy.nginx_reload_command || 'sudo nginx -s reload'
+          Kernel.system(nginx_reload_command)
         end
 
         def server_block(machine)
