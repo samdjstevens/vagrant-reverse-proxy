@@ -32,6 +32,10 @@ module VagrantPlugins
       action_hook(:reverse_proxy, :machine_action_halt) do |hook|
         hook.append(Action.remove_machine)
       end
+
+      action_hook(:reverse_proxy, :machine_action_reload) do |hook|
+        hook.append(Action.add_machine)
+      end
     end
   end
 end
