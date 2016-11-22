@@ -70,7 +70,7 @@ module VagrantPlugins
           Kernel.system('sudo', 'cp', tmp_file.to_s, nginx_config_file)
 
           # And reload nginx
-          nginx_reload_command = env[:machine].config.reverse_proxy.nginx_reload_command || 'sudo service nginx reload'
+          nginx_reload_command = env[:machine].config.reverse_proxy.nginx_reload_command || 'sudo nginx -s reload'
           Kernel.system(nginx_reload_command)
         end
 
