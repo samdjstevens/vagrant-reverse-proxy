@@ -87,15 +87,12 @@ module VagrantPlugins
             # http://host:80/... will NOT match http://host/...!
             port_suffix = vhost[:port] == 80 ? '' : ":#{vhost[:port]}"
             <<EOF
-location /#{path}/ {
-    proxy_set_header Host #{vhost[:host]};
-    proxy_set_header X-Forwarded-For $remote_addr;
-    proxy_set_header X-Forwarded-Host $host;
-    proxy_set_header X-Forwarded-Port $server_port;
-    proxy_set_header X-Base-Url http://$host:$server_port/#{path}/;
-
-    proxy_pass http://#{ip}#{port_suffix}/;
-    proxy_redirect http://#{vhost[:host]}#{port_suffix}/ /#{path}/;
+server {
+    server_name #{vhost[:host]};
+    location / {
+        proxy_set_header Host #{vhost[:host]};
+        proxy_pass http://#{ip}#{port_suffix}/;
+    }
 }
 EOF
           end.join("\n")
