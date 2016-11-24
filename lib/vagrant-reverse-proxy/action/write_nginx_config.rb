@@ -90,7 +90,7 @@ module VagrantPlugins
 server {
     server_name #{vhost[:host]};
     location / {
-        proxy_set_header Host #{vhost[:host]};
+        proxy_set_header Host $host;
         proxy_set_header X-Forwarded-Host $host;
         proxy_set_header X-Forwarded-Port $server_port;
         proxy_set_header X-Real-IP $remote_addr;
