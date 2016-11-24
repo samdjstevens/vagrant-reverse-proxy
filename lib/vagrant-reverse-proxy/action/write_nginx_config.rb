@@ -88,6 +88,8 @@ module VagrantPlugins
             port_suffix = vhost[:port] == 80 ? '' : ":#{vhost[:port]}"
             <<EOF
 server {
+    listen 80;
+    listen 443 ssl;
     server_name #{vhost[:host]};
     location / {
         proxy_set_header Host $host;
