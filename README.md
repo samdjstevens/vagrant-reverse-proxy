@@ -113,6 +113,7 @@ add a bit of custom code there if you need to override the base URL.
 
 ## Changelog
 
+- master Add support for `vagrant reload` (thanks to Sam Stevens).
 - 0.3.1 Allow overriding the NGINX reload command (thanks to Sam Stevens).
 - 0.3 Allow overriding the location of the NGINX configuration file
   (thanks to Sam Stevens).  Support multiple VMs in a single Vagrant
