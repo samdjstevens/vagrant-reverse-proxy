@@ -46,8 +46,8 @@ proxy to port 80 on the virtual machine with a `config.vm.hostname`
 value of `foo`.  This is only done for virtual machines that have
 `config.reverse_proxy.enabled` set to `true` in their config.
 
-Whenever you bring up or halt a machine, the plugin updates the proxy
-config file and invokes `sudo systemctl reload nginx` to make the
+Whenever you bring up, halt, or reload a machine, the plugin updates the proxy
+config file and invokes `sudo nginx -s reload` to make the
 change immediately visible.
 
 ### Custom host names
