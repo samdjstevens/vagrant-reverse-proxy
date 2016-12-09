@@ -31,6 +31,7 @@ If you don't need anything specific, just put the following in
 `/etc/nginx/sites-enabled/default`:
 
     server {
+        listen 80 default;
         listen [::]:80 default ipv6only=off;
         # This is the fallback server
         server_name default;
@@ -49,7 +50,7 @@ value of `foo`.  This is only done for virtual machines that have
 #### Server Blocks
 
 The plugin also writes `server` block configuration for the enabled VMs so that they can be
-accessed directly via their hostname (as long as the hostname resolves to the host machine's I.P address).
+accessed directly via their hostname (as long as the hostname resolves to the host machine's IP address).
 
 To include these, simply include the generated file inside your main nginx `http` block:
 

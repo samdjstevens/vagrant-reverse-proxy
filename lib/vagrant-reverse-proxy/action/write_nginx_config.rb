@@ -15,19 +15,9 @@ module VagrantPlugins
           # be removed.
           return unless env[:machine].config.reverse_proxy.enabled?
 
-          # Determine the filepaths for the locations config file. Give a default if not set.
-          if env[:machine].config.reverse_proxy.nginx_locations_config_file == VagrantPlugins::ReverseProxy::Plugin::Config::UNSET_VALUE
-            nginx_locations_config_file = '/etc/nginx/vagrant-proxy-config-locations'
-          else
-            nginx_locations_config_file = env[:machine].config.reverse_proxy.nginx_locations_config_file
-          end
-
-          # Determine the filepaths for the servers config file. Give a default if not set.
-          if env[:machine].config.reverse_proxy.nginx_servers_config_file == VagrantPlugins::ReverseProxy::Plugin::Config::UNSET_VALUE
-            nginx_servers_config_file = '/etc/nginx/vagrant-proxy-config-servers'
-          else
-            nginx_servers_config_file = env[:machine].config.reverse_proxy.nginx_servers_config_file
-          end
+          # Get the filepaths for the config files.
+          nginx_locations_config_file = env[:machine].config.reverse_proxy.nginx_locations_config_file
+          nginx_servers_config_file = env[:machine].config.reverse_proxy.nginx_servers_config_file
 
           env[:ui].info('Updating nginx configuration. Administrator privileges will be required...')
 
@@ -143,10 +133,13 @@ EOF
             <<EOF
 server {
     listen 80;
+    listen [::]:80;
     listen 443 ssl;
-    server_name #{vhost[:host]};
+    listen [::]:443 ssl;
+
+    server_name #{path};
     location / {
-        proxy_set_header Host $host;
+        proxy_set_header Host #{vhost[:host]};
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Host $host;
         proxy_set_header X-Forwarded-Port $server_port;
