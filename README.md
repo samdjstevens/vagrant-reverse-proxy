@@ -32,7 +32,7 @@ If you don't need anything specific, just put the following in
 
     server {
         listen 80 default;
-        listen [::]:80 default ipv6only=off;
+        listen [::]:80 default;
         # This is the fallback server
         server_name default;
         # Redirect http://localhost/hostname/lalala

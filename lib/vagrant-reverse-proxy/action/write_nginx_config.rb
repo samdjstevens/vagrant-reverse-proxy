@@ -10,39 +10,34 @@ module VagrantPlugins
         def call(env)
           @app.call(env)
 
+          # Get the plugin config for the machine
+          rp_config = env[:machine].config.reverse_proxy
+
           # Does this make much sense?  What if we disable it later
           # for one specific machine?  Then, the config should still
           # be removed.
-          return unless env[:machine].config.reverse_proxy.enabled?
-
-          # Get the filepaths for the config files.
-          nginx_locations_config_file = env[:machine].config.reverse_proxy.nginx_locations_config_file
-          nginx_servers_config_file = env[:machine].config.reverse_proxy.nginx_servers_config_file
+          return unless rp_config.enabled?
 
           env[:ui].info('Updating nginx configuration. Administrator privileges will be required...')
 
-          # Generate the locations config file if not set to nil
-          if nginx_locations_config_file
-            generate_config_file(env, nginx_locations_config_file, location_block(env[:machine]))
-          end
-
-          # Generate the servers config file if not set to nil
-          if nginx_servers_config_file
-            generate_config_file(env, nginx_servers_config_file, server_block(env[:machine]))
-          end
+          # Generate the config files
+          generate_config_file(env, rp_config.nginx_locations_config_file, location_block(env[:machine]))
+          generate_config_file(env, rp_config.nginx_servers_config_file, server_block(env[:machine]))
 
           # And reload nginx
-          nginx_reload_command = env[:machine].config.reverse_proxy.nginx_reload_command || 'sudo nginx -s reload'
+          nginx_reload_command = rp_config.nginx_reload_command || 'sudo nginx -s reload'
           Kernel.system(nginx_reload_command)
         end
 
-        def generate_config_file(env, file_to_write_to, config_block)
+        def generate_config_file(env, target_file, config_block)
+
+          return unless target_file
 
           # Get the directory of the file being written to
-          file_dir = File.dirname(file_to_write_to)
+          file_dir = File.dirname(target_file)
 
           unless File.directory?(file_dir)
-            env[:ui].error("Could not update nginx configuration file '#{file_to_write_to}' : directory '#{file_dir}' does not exist. Continuing...")
+            env[:ui].error("Could not update nginx configuration file '#{target_file}' : directory '#{file_dir}' does not exist. Continuing...")
             return
           end
 
@@ -57,7 +52,7 @@ module VagrantPlugins
           # changed, and might not have been present originally.
           File.open(tmp_file, 'w') do |new|
             begin
-              File.open(file_to_write_to, 'r') do |old|
+              File.open(target_file, 'r') do |old|
                 # First, remove old entries for this machine.
                 while ln = old.gets() do
                   if sm == ln.chomp
@@ -85,7 +80,7 @@ module VagrantPlugins
           end
 
           # Finally, copy tmp config to actual config
-          Kernel.system('sudo', 'cp', tmp_file.to_s, file_to_write_to)
+          Kernel.system('sudo', 'cp', tmp_file.to_s, target_file)
 
         end
 

@@ -32,8 +32,8 @@ module VagrantPlugins
               end
             end
           end
-          if @nginx_location_config_file == UNSET_VALUE
-            @nginx_location_config_file = '/etc/nginx/vagrant-proxy-config-locations'
+          if @nginx_locations_config_file == UNSET_VALUE
+            @nginx_locations_config_file = '/etc/nginx/vagrant-proxy-config-locations'
           end
           if @nginx_servers_config_file == UNSET_VALUE
             @nginx_servers_config_file = '/etc/nginx/vagrant-proxy-config-servers'
